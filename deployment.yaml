@@ -11,6 +11,16 @@ spec:
     app: hello-world
   type: LoadBalancer
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: hello-world
+  name: hello-world-config
+data:
+  config.yaml: |-
+    property: value
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,8 +35,16 @@ spec:
       labels:
         app: hello-world
     spec:
+      volumes:
+      - name: hello-world-config
+        configMap:
+          name: hello-world-config
       containers:
       - name: hello-world
         image: tomcat:9.0
         ports:
         - containerPort: 8080
+        volumeMounts:
+            - name: hello-world-config
+              readOnly: true
+              mountPath: /etc/config
